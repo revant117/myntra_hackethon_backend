@@ -2,9 +2,35 @@ var express = require('express')
 var app = express()
 var port = process.env.PORT || 3000
 var request = require('request')
+var mongodb = require('mongodb')
+var MongoClient = mongodb.MongoClient
+var url = "mongodb://myntra:myntra@kahana.mongohq.com:10060/habreg?replicaSet=set-53864de4d9f28ee0f9002afb"
+var db;
+MongoClient.connect(url, (err, myDb) => {
+  if(err) {
+    console.log(err)
+  }else {
+    console.log("Connected to db")
+    db = myDb
+  }
+})
 
 app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/index.js')
+  var id = req.query.id;
+  if(id) {
+    db.collection('config').insert({'userId': id, 'greetings': true, 'cron': true, 'onEveryItem': true}, (err, configRes) => {
+
+      if(!err) {
+        db.collection('users').insert({'id': id, 'config': configRes.ops[0]._id}, (err, result) => {
+          if(!err) {
+            res.sendFile(__dirname + '/index.js')
+          }
+        }) 
+      }
+    })
+  }else {
+    res.json({"err": "id not sent"})
+  }
 })
 
 app.get('/get-myntra', (req, res) => {
@@ -14,7 +40,35 @@ app.get('/get-myntra', (req, res) => {
     if(!err) {
       var data = JSON.parse(body)
       res.json(parseArray(data.data.results.products))
+    }
+  })
+})
 
+app.get('/get-users', (req, res) => {
+  db.collection('users').find({}).toArray((err, users) => {
+    if(!err) {
+      res.json(users)
+    }
+  })
+})
+
+app.get('/get-config', (req, res) => {
+  var id = req.query.id;
+  db.collection('config').findOne({'userId': id}, (err, config) => {
+    if(!err)
+      res.send(config)
+  })
+})
+
+app.get('/set-config', (req, res) => {
+  var id = req.query.id
+  var configType = req.query.configType
+  var configValue = req.query.configValue
+  var d = {}
+  d[configType] = configValue
+  db.collection('config').update({'userId': id}, {$set: d}, (err, result) => {
+    if(!err){
+      res.send('success');
     }
   })
 })
