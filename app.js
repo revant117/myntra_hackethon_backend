@@ -39,7 +39,7 @@ app.get('/get-myntra', (req, res) => {
   request.get(url, (err, response, body) => {
     if(!err) {
       var data = JSON.parse(body)
-      res.json(parseArray(data.data.results.products))
+      res.json({"data": parseArray(data.data.results.products)})
     }
   })
 })
