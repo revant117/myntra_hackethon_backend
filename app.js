@@ -1,3 +1,4 @@
+var sentiment = require('sentiment');
 var express = require('express')
 var app = express()
 var port = process.env.PORT || 3000
@@ -10,6 +11,8 @@ if(process.env.PORT)
 else 
   url = "mongodb://localhost,localhost:27017"
 var db;
+
+
 MongoClient.connect(url, (err, myDb) => {
   if(err) {
     console.log(err)
@@ -76,6 +79,17 @@ app.get('/set-config', (req, res) => {
     }
   })
 })
+
+app.get('/sentiment' , (req,res) => {
+  var statment = req.query.statement;
+  var r1 = sentiment(statement);
+  var tokens = sentiment["tokens"];
+  if (r1["score"] < 0)
+    res.send({"sentiment":"negative" , "tokens":tokens});
+  else
+    res.send({"sentiment":"positive" , "tokens":tokens});
+});
+
 
 function parseArray(productArray) {
   return productArray.map(product => {

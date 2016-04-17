@@ -14,5 +14,6 @@
     "level": "1.4.0",
     "mongodb": "2.1.16",
     "request": "2.71.0"
+    "sentiment": "1.0.60", 
   }
 }
