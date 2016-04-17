@@ -4,7 +4,11 @@ var port = process.env.PORT || 3000
 var request = require('request')
 var mongodb = require('mongodb')
 var MongoClient = mongodb.MongoClient
-var url = "mongodb://myntra:myntra@kahana.mongohq.com:10060/habreg?replicaSet=set-53864de4d9f28ee0f9002afb"
+var url;
+if(process.env.PORT)
+  url = "mongodb://myntra:myntra@kahana.mongohq.com:10060/habreg?replicaSet=set-53864de4d9f28ee0f9002afb"
+else 
+  url = "mongodb://localhost,localhost:27017"
 var db;
 MongoClient.connect(url, (err, myDb) => {
   if(err) {
